@@ -1,8 +1,6 @@
 # 🧠 PsychAI: *Where AI Understands the Human Mind*
 
-<p align="center">
-  <img src="https://img.icons8.com/fluency/96/000000/mental-health.png" alt="icon" width="80"/>
-  <br/>
+
   <strong>Bridging cutting-edge AI with compassionate mental healthcare</strong>
 </p>
 
