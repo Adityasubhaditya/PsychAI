@@ -13,11 +13,11 @@
 | Feature | Benefit |
 |--------|---------|
 | 🚀 **Precision Diagnostics** | AI analysis of language/behavior detects conditions with 85%+ accuracy |
-| 🌍 **Always Accessible** | 24/7 mental health support via empathetic AI chatbots |
+| 🌍 **Always Accessible** | 24/7 mental health support |
 | 🔥 **Crisis Prevention** | Early warning system for high-risk behaviors |
 | 🧪 **Research Revolution** | Processes neurodata 10x faster than manual methods |
 | 🤖 **Contextual Intelligence** | Understands cultural, linguistic, and emotional nuance |
-| 🧬 **Adaptive Learning** | Continuously improves based on real-world feedback |
+
 
 ---
 
@@ -26,24 +26,20 @@
 ### 👩⚕️ For Clinicians
 - 🧠 **AI-Assisted Case Analysis**: Summarizes session transcripts, flags key emotional shifts, and suggests clinical hypotheses  
 - 📊 **Automated Progress Tracking**: Visualize patient trends over time with mood, sleep, and engagement data  
-- 📝 **Reduced Documentation Time**: Generates structured notes from session recordings and patient inputs  
-- 🔗 **EHR Integration**: Seamlessly connects with existing healthcare systems  
+- 📝 **Reduced Documentation Time**: Generates structured notes from session recordings and patient inputs   
 
 ---
 
 ### 🤗 For Patients
 - 🎯 **Personalized Coping Strategies**: Recommends breathing techniques, journaling prompts, or CBT tools based on real-time emotion tracking  
 - 🕵️ **Anonymous Screening Tools**: Take clinically-validated assessments privately, anytime  
-- 🤝 **Therapist Matching System**: Uses personality and needs alignment for better therapeutic outcomes  
-- 🧘 **Daily Wellness Companion**: Check-ins, affirmations, and goal-setting tailored to the user’s state of mind  
+- 🤝 **Therapist Matching System**: Uses personality and needs alignment for better therapeutic outcomes   
 
 ---
 
-### 🔍 For Researchers
-- 🧬 **Next-Gen fMRI/EEG Analysis**: Identifies neurological patterns across large datasets with AI-driven pattern recognition  
+### 🔍 For Researchers 
 - 📈 **Large-Scale Study Tools**: Launch and monitor psychological studies with real-time feedback dashboards  
 - 🔮 **Treatment Outcome Modeling**: Simulate long-term outcomes of therapies across demographics and mental health conditions  
-- 🗂️ **Behavioral Dataset Generator**: Pseudonymized, high-fidelity language and behavior datasets for training and testing  
 
 ---
 
@@ -51,7 +47,6 @@
 
 At PsychAI, innovation never comes at the cost of integrity.
 
-- 🔒 **Military-Grade Encryption**: Every message and data point is secured end-to-end  
 - ⚖️ **Rigorous Bias Testing**: Models trained and tested for fairness across gender, ethnicity, and language groups  
 - 👩💻 **Human Oversight Required**: AI assists, but never replaces, licensed mental health professionals  
 - 📢 **Open Ethics Reports**: Transparent publication of testing procedures, failures, and improvement cycles  
