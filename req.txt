@@ -1,0 +1,7 @@
+flask
+requests
+python-dotenv
+streamlit
+pdfkit
+flask-cors
+fpdf
