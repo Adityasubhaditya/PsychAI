@@ -256,99 +256,97 @@ if 'analysis' in st.session_state:
             
             generate_report = st.form_submit_button("🖨️ Generate PDF Report")
 
-    if generate_report:
-        # Combine all diagnoses
-        all_diagnoses = selected_diagnoses
-        if additional_diagnoses:
-            all_diagnoses.extend([d.strip() for d in additional_diagnoses.split(",") if d.strip()])
-        
-        # Create PDF report
-        class PDF(FPDF):
-            def header(self):
-                self.set_font('Arial', 'B', 16)
-                self.cell(0, 10, f'PsychAI Clinical Report - {name}', 0, 1, 'C')
-                self.ln(5)
+        if generate_report:
+            # Combine all diagnoses
+            all_diagnoses = selected_diagnoses
+            if additional_diagnoses:
+                all_diagnoses.extend([d.strip() for d in additional_diagnoses.split(",") if d.strip()])
             
-            def footer(self):
-                self.set_y(-15)
-                self.set_font('Arial', 'I', 8)
-                self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+            # Create PDF report (MODIFIED SECTION)
+            class PDF(FPDF):
+                def __init__(self):
+                    super().__init__()
+                    self.set_font("Helvetica", "", 12)
+                
+                def header(self):
+                    self.set_font("Helvetica", "B", 16)
+                    self.cell(0, 10, f'PsychAI Clinical Report - {name}', 0, 1, 'C')
+                    self.ln(5)
+                
+                def footer(self):
+                    self.set_y(-15)
+                    self.set_font("Helvetica", "I", 8)
+                    self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
 
-        try:
-            pdf = PDF()
-            pdf.add_page()
-            pdf.set_margins(15, 15, 15)  # Set margins to ensure space
-            
-            # Set UTF-8 encoding for special characters
-            pdf.set_doc_option('core_fonts_encoding', 'utf-8')
-            
-            # Report Header
-            pdf.set_font("Arial", size=12)
-            pdf.cell(0, 10, f"Patient: {name}, {age} years ({gender})", ln=1)
-            pdf.cell(0, 10, f"Assessment Date: {datetime.now().strftime('%Y-%m-%d')}", ln=1)
-            pdf.ln(10)
-            
-            # Diagnoses Section
-            pdf.set_font("Arial", 'B', 14)
-            pdf.cell(0, 10, "Diagnoses", ln=1)
-            pdf.set_font("Arial", size=12)
-            for dx in all_diagnoses:
-                # Clean diagnosis text
-                clean_dx = re.sub(r'[^\x00-\x7F]+', ' ', str(dx))  # Remove non-ASCII
-                clean_dx = ' '.join(clean_dx.split())  # Remove extra whitespace
-                pdf.multi_cell(0, 10, f"• {clean_dx[:200]}")  # Limit to 200 chars per line
-            pdf.ln(5)
-            
-            # Treatment Plan
-            pdf.set_font("Arial", 'B', 14)
-            pdf.cell(0, 10, "Treatment Plan", ln=1)
-            pdf.set_font("Arial", size=12)
-            pdf.multi_cell(0, 10, f"Therapy: {therapy_type} ({sessions} sessions recommended)")
-            
-            # Medications
-            pdf.set_font("Arial", 'B', 12)
-            pdf.cell(0, 10, "Medications:", ln=1)
-            if medications:
-                # Clean medications text
-                clean_meds = re.sub(r'[^\x00-\x7F]+', ' ', str(medications))
-                clean_meds = ' '.join(clean_meds.split())
-                pdf.set_font("Arial", size=10)  # Smaller font
-                for line in clean_meds.split('\n'):
-                    pdf.multi_cell(0, 8, line[:150])  # Limit to 150 chars per line
-                pdf.set_font("Arial", size=12)
-            pdf.ln(5)
-            
-            # Clinical Notes
-            pdf.set_font("Arial", 'B', 14)
-            pdf.cell(0, 10, "Clinical Notes", ln=1)
-            pdf.set_font("Arial", size=12)
-            if clinician_notes:
-                clean_notes = re.sub(r'[^\x00-\x7F]+', ' ', str(clinician_notes))
-                clean_notes = ' '.join(clean_notes.split())
-                pdf.multi_cell(0, 10, clean_notes[:500])  # Limit to 500 chars
-            pdf.ln(5)
-            
-            # Follow Up
-            pdf.set_font("Arial", 'B', 14)
-            pdf.cell(0, 10, "Follow Up", ln=1)
-            pdf.set_font("Arial", size=12)
-            pdf.cell(0, 10, f"Next appointment: {follow_up.strftime('%Y-%m-%d')} ({urgency} priority)", ln=1)
-            
-            # Save PDF
-            filename = f"{REPORTS_DIR}/{name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
-            pdf.output(filename)
-            
-            # Provide download link
-            with open(filename, "rb") as f:
-                pdf_bytes = f.read()
-            b64 = base64.b64encode(pdf_bytes).decode()
-            href = f'<a href="data:application/pdf;base64,{b64}" download="{os.path.basename(filename)}" class="pdf-button">⬇️ Download Full Report</a>'
-            st.markdown(href, unsafe_allow_html=True)
-            st.success("Report generated successfully!")
-            
-        except Exception as e:
-            st.error(f"Failed to generate PDF: {str(e)}")
-            st.error("Please check the input text for any unusual characters or formatting.")
+            try:
+                pdf = PDF()
+                pdf.add_page()
+                pdf.set_margins(15, 15, 15)
+
+                # Patient Info
+                pdf.set_font("Helvetica", size=12)
+                pdf.cell(0, 10, f"Patient: {name}, {age} years ({gender})", ln=1)
+                pdf.cell(0, 10, f"Assessment Date: {datetime.now().strftime('%Y-%m-%d')}", ln=1)
+                pdf.ln(10)
+
+                # Diagnoses
+                pdf.set_font("Helvetica", "B", 14)
+                pdf.cell(0, 10, "Diagnoses", ln=1)
+                pdf.set_font("Helvetica", size=12)
+                for dx in all_diagnoses:
+                    clean_dx = dx.replace("•", "-").encode('latin-1', 'replace').decode('latin-1')
+                    pdf.multi_cell(0, 10, f"- {clean_dx}")
+                pdf.ln(5)
+
+                # Therapy
+                pdf.set_font("Helvetica", "B", 14)
+                pdf.cell(0, 10, "Treatment Plan", ln=1)
+                pdf.set_font("Helvetica", size=12)
+                pdf.multi_cell(0, 10, f"Therapy: {therapy_type} ({sessions} sessions recommended)")
+
+                # Medications
+                pdf.set_font("Helvetica", "B", 12)
+                pdf.cell(0, 10, "Medications:", ln=1)
+                if medications:
+                    pdf.set_font("Helvetica", size=10)
+                    for line in medications.split('\n'):
+                        safe_line = line.replace("•", "-").encode('latin-1', 'replace').decode('latin-1')
+                        pdf.multi_cell(0, 8, safe_line)
+                    pdf.set_font("Helvetica", size=12)
+                pdf.ln(5)
+
+                # Clinical Notes
+                pdf.set_font("Helvetica", "B", 14)
+                pdf.cell(0, 10, "Clinical Notes", ln=1)
+                pdf.set_font("Helvetica", size=12)
+                if clinician_notes:
+                    safe_notes = clinician_notes.replace("•", "-").encode('latin-1', 'replace').decode('latin-1')
+                    pdf.multi_cell(0, 10, safe_notes)
+                pdf.ln(5)
+
+                # Follow-Up
+                pdf.set_font("Helvetica", "B", 14)
+                pdf.cell(0, 10, "Follow Up", ln=1)
+                pdf.set_font("Helvetica", size=12)
+                follow_str = f"Next appointment: {follow_up.strftime('%Y-%m-%d')} ({urgency} priority)"
+                safe_follow = follow_str.encode('latin-1', 'replace').decode('latin-1')
+                pdf.cell(0, 10, safe_follow, ln=1)
+
+                # Save PDF
+                filename = f"{REPORTS_DIR}/{name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+                pdf.output(filename)
+
+                # Download link
+                with open(filename, "rb") as f:
+                    pdf_bytes = f.read()
+                b64 = base64.b64encode(pdf_bytes).decode()
+                href = f'<a href="data:application/pdf;base64,{b64}" download="{os.path.basename(filename)}" class="pdf-button">⬇️ Download Full Report</a>'
+                st.markdown(href, unsafe_allow_html=True)
+                st.success("Report generated successfully!")
+
+            except Exception as e:
+                st.error(f"Failed to generate PDF: {str(e)}")
+                st.error("Please check the input text for any unusual characters or formatting.")
 
     # Original Analysis Display Tabs
     tabs = st.tabs(["Formatted Report", "Raw Analysis", "Payload Data"])
