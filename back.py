@@ -2,90 +2,92 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
-import re
 from dotenv import load_dotenv
+from tenacity import retry, stop_after_attempt, wait_exponential
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-if not OPENROUTER_API_KEY:
-    raise ValueError("Missing OPENROUTER_API_KEY in .env")
+if not GROQ_API_KEY:
+    raise ValueError("Missing GROQ_API_KEY in .env")
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "meta-llama/llama-3-8b-instruct"
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+DEFAULT_MODEL = "mixtral-8x7b-32768"  # Groq's fastest model
 
-def call_openrouter_llm(prompt: str) -> str:
+SYSTEM_PROMPT = """
+You are a Netflix recommendation expert. Provide:
+1. 3-5 tailored recommendations
+2. Brief descriptions
+3. Why they match the request
+4. Seasons info for shows
+Format with emojis and clear sections.
+"""
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+def call_groq(messages):
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost",
-        "X-Title": "Mental Health Diagnostic Assistant"
     }
 
     payload = {
-        "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": (
-                "You are an AI assistant that helps psychiatrists diagnose "
-                "and treat mental health conditions based on detailed patient data. "
-                "Provide thoughtful, in-depth analysis and possible diagnosis, "
-                "including suggested treatment options, precautions, and follow-up "
-                "recommendations. Use professional and compassionate language."
-            )},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.5,
-        "max_tokens": 1200
+        "model": DEFAULT_MODEL,
+        "messages": messages,
+        "temperature": 0.7,
+        "max_tokens": 800
     }
 
-    response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload)
-    if response.status_code != 200:
-        raise Exception(f"OpenRouter API Error {response.status_code}: {response.text}")
-
-    data = response.json()
-    return data["choices"][0]["message"]["content"]
-
-def extract_treatment_plan(text: str) -> str:
-    match = re.search(r"(Suggested|Recommended|Treatment)[^\n]*\n[-•\s]+(.+?)(?=\n\d|$)", text, re.DOTALL | re.IGNORECASE)
-    return match.group(0).strip() if match else "No specific treatment plan found."
-
-@app.route("/api/analyze", methods=["POST"])
-def analyze():
     try:
-        data = request.get_json(force=True)
-
-        prompt = (
-            f"Patient details:\n"
-            f"- Age: {data.get('age', 'Not specified')}\n"
-            f"- Gender: {data.get('gender', 'Not specified')}\n"
-            f"- Symptoms: {data.get('reported_symptoms', 'Not specified')}\n"
-            f"- Medical History: {data.get('existing_conditions', 'Not specified')}\n"
-            f"- Family History: {data.get('family_history', 'Not specified')}\n"
-            f"- Current Medications: {data.get('medications', 'Not specified')}\n"
-            f"- Lifestyle Factors: {data.get('socio_environmental_context', 'Not specified')}\n"
-            f"- Other Notes: {data.get('behavioral_changes', '')}, {data.get('therapy_history', '')}\n\n"
-            "Please analyze the patient's condition in detail. Provide:\n"
-            "1. Possible diagnoses or conditions\n"
-            "2. Suggested treatment plans or therapies\n"
-            "3. Precautions or warning signs to monitor\n"
-            "4. Recommendations for follow-up and further tests\n"
-            "5. Any relevant psychological or social considerations"
+        response = requests.post(
+            GROQ_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=30
         )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Groq API Error: {str(e)}")
+        raise
 
-        result = call_openrouter_llm(prompt)
-        treatment_plan = extract_treatment_plan(result)
+@app.route("/api/recommend", methods=["POST"])
+def recommend():
+    try:
+        data = request.get_json()
+        if not data or "prompt" not in data:
+            return jsonify({"error": "Missing 'prompt' in request"}), 400
+        
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": data["prompt"]}
+        ]
 
+        response = call_groq(messages)
+        ai_message = response["choices"][0]["message"]
+        
         return jsonify({
-            "plain_text": result,
-            "html": result.replace("\n", "<br>"),
-            "treatment_plan": treatment_plan.replace("\n", "<br>")
+            "response": ai_message["content"],
+            "model": DEFAULT_MODEL
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Error in /api/recommend")
+        return jsonify({
+            "error": "Failed to get recommendations",
+            "details": str(e)
+        }), 500
+
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
 
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8002, debug=True)
