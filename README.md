@@ -44,20 +44,35 @@ PsychAI brings validated screening, safety checks, evidence retrieval and constr
 
 ## 🏗️ Architecture
 
-```mermaid
-flowchart LR
-    A[Next.js client] --> B[PHQ-9 / GAD-7 scoring]
-    A --> C[/api/analyze]
-    C --> D{Safety signal?}
-    D -->|Yes| E[Deterministic safety protocol]
-    D -->|No| F[Local evidence retrieval]
-    F --> G[Groq structured synthesis]
-    G --> H[Validated clinical JSON]
-    H --> I[Care-plan workspace]
-    I --> J[In-browser PDF generation]
-```
+PsychAI uses a compact full-stack architecture with clear separation between the interface, clinical rules and AI-assisted analysis.
 
-The frontend and backend live in one Vercel-ready Next.js project. `/api/analyze` becomes an on-demand serverless function, while the main interface is statically optimized.
+| Layer | Main components | Responsibility |
+|---|---|---|
+| **Interface** | Next.js page, React state, responsive CSS | Collects screening responses and presents the psychological overview |
+| **Clinical logic** | `lib/assessments.ts` | Calculates PHQ-9/GAD-7 scores and evaluates safety signals deterministically |
+| **Analysis API** | `app/api/analyze/route.ts` | Validates the request and coordinates the appropriate analysis pathway |
+| **Intelligence** | Local guidance index, Groq, schema validation | Retrieves relevant evidence and produces a constrained psychological formulation |
+| **Care planning** | React care-plan workspace, jsPDF | Records clinician-directed care details and creates the downloadable PDF |
+| **Session privacy** | Browser `sessionStorage`, no database | Keeps score history only for the active browser session |
+
+### Request flow
+
+```text
+Screening responses
+        │
+        ▼
+Deterministic scoring and safety check
+        │
+        ├── Safety signal ──► Structured safety response
+        │
+        └── Routine pathway ──► Evidence retrieval ──► Constrained AI synthesis
+                                                        │
+                                                        ▼
+                                             Validated psychological overview
+                                                        │
+                                                        ▼
+                                              Care plan and PDF download
+```
 
 ## 🧰 Tech stack
 
@@ -103,20 +118,11 @@ npm run check
 npm run build
 ```
 
-## ☁️ Vercel deployment
-
-1. Import this repository into Vercel.
-2. Add `GROQ_API_KEY` under **Project Settings → Environment Variables**.
-3. Optionally set `GROQ_MODEL=openai/gpt-oss-20b`.
-4. Deploy using the automatically detected Next.js preset.
-
-No Python runtime, database or persistent server is required for the deployed application.
-
 ## 🗂️ Legacy Python prototype
 
 The original `front.py`, `back.py` and `req.txt` files are intentionally retained for historical reference and comparison only.
 
-**They are not imported, executed, built or deployed by the current application.** The production implementation is entirely Next.js/React/TypeScript, and Vercel only builds the files described by `package.json` and the Next.js application structure.
+**They are not imported, executed or built by the current application.** The production implementation is entirely Next.js, React and TypeScript.
 
 ## 📁 Current project structure
 

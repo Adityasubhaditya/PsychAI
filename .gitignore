@@ -38,3 +38,6 @@ npm-debug.log*
 
 # Superseded local ignore file
 gitignore.txt
+
+.vercel
+.env*
