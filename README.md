@@ -11,6 +11,8 @@ PsychAI converts structured screening responses and de-identified context into a
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=111827)](https://react.dev/)
 [![Vercel](https://img.shields.io/badge/Vercel-Ready-000000?style=for-the-badge&logo=vercel)](https://vercel.com/)
 
+[**Open the live application →**](https://psychai-ten.vercel.app)
+
 </div>
 
 ---
