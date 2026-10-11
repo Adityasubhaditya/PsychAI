@@ -1,0 +1,40 @@
+# JavaScript / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python legacy files
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Generated or sensitive reports
+patient_reports/
+*.pdf
+output/
+tmp/
+
+# Legacy local assets and environments
+dejavu-fonts-ttf-2.37/
+dejavu-fonts-ttf-2.37.zip
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Superseded local ignore file
+gitignore.txt

@@ -156,17 +156,19 @@ with st.form("patient_form"):
         mood = st.text_area("Current Mood / Affect")
         behavior = st.text_area("Behavioral Changes")
         sleep = st.text_area("Sleep Patterns")
+        history = st.text_area("Existing Mental-Health Conditions (e.g., depression, anxiety)")
 
     with col2:
-        history = st.text_area("Existing Mental-Health Conditions")
-        meds = st.text_area("Past / Current Medications")
-        therapy_hist = st.text_area("Therapy History")
-        symptoms = st.text_area("Patient-Reported Symptoms")
-        family_hist = st.text_area("Family History (optional)")
-        context = st.text_area("Socio-environmental Context (optional)")
+        meds = st.text_area("Past / Current Medications (e.g., fluoxetine, risperidone)")
+        therapy_hist = st.text_area("Therapy History (e.g., CBT sessions, inpatient treatment)")
+        symptoms = st.text_area("Patient-Reported Symptoms (e.g., insomnia, mood swings, panic attacks)")
+        family_hist = st.text_area("Family History (e.g., any family member having bipolar disorder, ADHD, schizophrenia)")
+        context = st.text_area("Socio-environmental Context (e.g., unemployment, living alone, recent relocation)")
 
     submitted = st.form_submit_button("🔍 Analyze", use_container_width=True)
 
+if submitted:
+    st.success(f"Form submitted for: {name}")
 # ----- On Submit -----
 if submitted:
     if not name:
